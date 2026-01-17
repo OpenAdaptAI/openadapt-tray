@@ -5,6 +5,7 @@ for modern, native notifications across all platforms.
 """
 
 import asyncio
+import os
 import sys
 import subprocess
 from typing import Optional, Callable
@@ -66,6 +67,18 @@ class NotificationManager:
                 return "windows"
             else:
                 return "linux"
+
+        # On macOS, check if running from app bundle
+        if sys.platform == "darwin":
+            # Check both APP_BUNDLE env var and actual bundle structure
+            is_app_bundle = (
+                os.environ.get('APP_BUNDLE') or
+                'Contents/MacOS' in str(Path(__file__).resolve())
+            )
+            if not is_app_bundle:
+                # Not in app bundle - use AppleScript fallback
+                print("Not running from app bundle - using AppleScript for notifications")
+                return "macos"
 
         # Use desktop-notifier on all platforms
         return "desktop-notifier"
