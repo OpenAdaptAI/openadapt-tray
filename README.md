@@ -14,6 +14,7 @@ A cross-platform system tray application for [OpenAdapt](https://openadapt.ai), 
 
 - **System Tray Icon**: Shows in the menu bar (macOS) or system tray (Windows/Linux)
 - **Status Indicators**: Icon changes color based on application state (idle, recording, training, error)
+- **Native Notifications**: Modern notifications with desktop-notifier supporting callbacks and actions
 - **Start/Stop Recording**: Control capture sessions via menu or global hotkeys
 - **Recent Captures**: Quick access to view or delete recent recordings
 - **Training Control**: Start, monitor, and stop model training
@@ -151,6 +152,7 @@ openadapt-tray/
 - **Pillow** (>=9.0.0): Icon handling
 - **pynput** (>=1.7.0): Global hotkeys
 - **click** (>=8.0.0): CLI integration
+- **desktop-notifier** (>=6.0.0): Modern native notifications
 
 ## Integration
 

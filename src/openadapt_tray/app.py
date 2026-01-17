@@ -306,6 +306,7 @@ class TrayApplication:
         # Cleanup components
         self.hotkeys.stop()
         self.ipc.close()
+        self.notifications.cleanup()
         self.platform.cleanup()
 
         # Stop tray icon
