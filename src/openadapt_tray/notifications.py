@@ -80,7 +80,7 @@ class NotificationManager:
                 try:
                     from desktop_notifier.macos import CocoaNotificationCenter
                     # Try to initialize to see if it works
-                    test_notifier = CocoaNotificationCenter()
+                    CocoaNotificationCenter()
                     print("desktop-notifier initialized successfully")
                     return "desktop-notifier"
                 except Exception as e:
