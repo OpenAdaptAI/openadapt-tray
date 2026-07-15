@@ -1,16 +1,16 @@
 [project]
 name = "openadapt-tray"
 version = "0.0.1"
-description = "System tray application for OpenAdapt"
+description = "Experimental status and launcher companion for OpenAdapt workflow authoring and governed repair"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 authors = [
     {name = "MLDSAI Inc.", email = "richard@mldsai.com"}
 ]
-keywords = ["gui", "system-tray", "menu-bar", "openadapt"]
+keywords = ["gui", "system-tray", "menu-bar", "workflow-automation", "openadapt"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 2 - Pre-Alpha",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Operating System :: MacOS",
