@@ -69,5 +69,6 @@ jobs:
 
       - name: Run tests
         env:
+          PYNPUT_BACKEND: ${{ matrix.os == 'ubuntu-latest' && 'dummy' || '' }}
           PYSTRAY_BACKEND: ${{ matrix.os == 'ubuntu-latest' && 'dummy' || '' }}
         run: uv run --python ${{ matrix.python }} pytest tests -q
