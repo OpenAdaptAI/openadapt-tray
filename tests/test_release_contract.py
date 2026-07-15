@@ -20,6 +20,7 @@ def test_semantic_release_refreshes_and_stages_lock_before_tagging() -> None:
         'version_variables = ["src/openadapt_tray/__init__.py:__version__"]'
         in pyproject
     )
+    assert re.search(r"(?m)^allow_zero_version\s*=\s*true\s*$", pyproject)
     assert re.search(r"(?m)^major_on_zero\s*=\s*false\s*$", pyproject)
     assert 'uv lock --upgrade-package "$PACKAGE_NAME"' in pyproject
     assert "git add uv.lock" in pyproject

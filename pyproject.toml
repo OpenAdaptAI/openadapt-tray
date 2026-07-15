@@ -76,6 +76,7 @@ version_toml = ["pyproject.toml:project.version"]
 version_variables = ["src/openadapt_tray/__init__.py:__version__"]
 commit_message = "chore: release {version}"
 # Keep Experimental releases pre-1.0 until API stability is declared.
+allow_zero_version = true
 major_on_zero = false
 build_command = """
 python -m pip install --disable-pip-version-check -e '.[release]'
