@@ -42,6 +42,9 @@ dev = [
     "pytest-mock>=3.10.0",
     "ruff>=0.1.0",
 ]
+release = [
+    "uv==0.11.26",
+]
 all = [
     "openadapt-tray[macos-native]",
 ]
@@ -70,7 +73,14 @@ target-version = "py310"
 
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
+version_variables = ["src/openadapt_tray/__init__.py:__version__"]
 commit_message = "chore: release {version}"
+build_command = """
+python -m pip install --disable-pip-version-check -e '.[release]'
+uv lock --upgrade-package "$PACKAGE_NAME"
+git add uv.lock
+uv build --wheel --sdist
+"""
 
 [tool.semantic_release.branches.main]
 match = "main"

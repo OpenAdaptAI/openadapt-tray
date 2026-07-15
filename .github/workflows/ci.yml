@@ -31,7 +31,7 @@ jobs:
         run: uv sync --locked --extra dev
 
       - name: Ruff lint
-        run: uv run ruff check src tests
+        run: uv run ruff check src tests scripts
 
       - name: Build distributions
         run: uv build
