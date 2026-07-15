@@ -68,4 +68,6 @@ jobs:
         run: uv sync --locked --extra dev --python ${{ matrix.python }}
 
       - name: Run tests
+        env:
+          PYSTRAY_BACKEND: ${{ matrix.os == 'ubuntu-latest' && 'dummy' || '' }}
         run: uv run --python ${{ matrix.python }} pytest tests -q

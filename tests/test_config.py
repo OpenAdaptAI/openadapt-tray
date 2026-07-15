@@ -79,7 +79,7 @@ class TestTrayConfig:
 
         assert isinstance(path, Path)
         assert not str(path).startswith("~")
-        assert str(path).endswith("test/captures")
+        assert path.parts[-2:] == ("test", "captures")
 
     def test_hosted_defaults(self):
         """Test hosted/loop config defaults."""
