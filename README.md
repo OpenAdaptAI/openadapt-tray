@@ -103,7 +103,7 @@ poller.
 ### Deployment-lane routing
 
 - `cloud`: a needs-attention click opens
-  `<hosted_url>/dashboard/needs-attention`.
+  `<hosted_url>/dashboard`, which lists open halts and uncertain dispatches.
 - `byoc`: while desktop IPC is connected, the click sends `open_teach` locally
   so workflow data can remain in the customer environment.
 - `byoc` without desktop IPC: the current implementation falls back to the

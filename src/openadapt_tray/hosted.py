@@ -8,10 +8,10 @@ Contract (spec §3c) — the exact request this module issues::
 
     GET {hosted_url}/api/needs-attention/count
     Authorization: Bearer <ingest token>
-    → 200 { "count": <int>, "open_halts": <int>, "failed_runs": <int> }
+    → 200 { "count": <int>, "halts": <int>, "uncertain_dispatches": <int> }
 
 Click routing is lane-aware:
-  * cloud lane → open ``{hosted_url}/dashboard/needs-attention`` in the browser
+  * cloud lane → open ``{hosted_url}/dashboard`` in the browser
   * byoc lane  → IPC ``open_teach`` to the desktop (the fix stays local)
 """
 
@@ -37,16 +37,16 @@ class CountResult:
     """Parsed response from the needs-attention count endpoint."""
 
     count: int
-    open_halts: int = 0
-    failed_runs: int = 0
+    halts: int = 0
+    uncertain_dispatches: int = 0
 
     @classmethod
     def from_payload(cls, payload: dict) -> "CountResult":
         """Build a result from the JSON body, tolerating missing subfields."""
         return cls(
             count=int(payload.get("count", 0)),
-            open_halts=int(payload.get("open_halts", 0)),
-            failed_runs=int(payload.get("failed_runs", 0)),
+            halts=int(payload.get("halts", 0)),
+            uncertain_dispatches=int(payload.get("uncertain_dispatches", 0)),
         )
 
 
@@ -224,4 +224,4 @@ def route_break_click(
             except Exception as e:
                 print(f"Failed to route byoc break click to desktop: {e}")
         # Fall through to the dashboard if the desktop is unreachable.
-    webbrowser.open(f"{config.hosted_url.rstrip('/')}/dashboard/needs-attention")
+    webbrowser.open(f"{config.hosted_url.rstrip('/')}/dashboard")

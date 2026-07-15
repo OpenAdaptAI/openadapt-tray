@@ -56,15 +56,15 @@ class _FakeClient:
 class TestCountResult:
     def test_from_payload(self):
         r = CountResult.from_payload(
-            {"count": 3, "open_halts": 2, "failed_runs": 1}
+            {"count": 3, "halts": 2, "uncertain_dispatches": 1}
         )
-        assert (r.count, r.open_halts, r.failed_runs) == (3, 2, 1)
+        assert (r.count, r.halts, r.uncertain_dispatches) == (3, 2, 1)
 
     def test_from_payload_tolerates_missing(self):
         r = CountResult.from_payload({"count": 5})
         assert r.count == 5
-        assert r.open_halts == 0
-        assert r.failed_runs == 0
+        assert r.halts == 0
+        assert r.uncertain_dispatches == 0
 
 
 class TestCountUrl:
@@ -84,13 +84,15 @@ class TestPollOnce:
             cfg, on_count=lambda r: None, token_provider=lambda: "oai_ingest_x"
         )
         fake = _FakeClient(
-            _FakeResponse(200, {"count": 4, "open_halts": 4, "failed_runs": 0})
+            _FakeResponse(200, {"count": 4, "halts": 3, "uncertain_dispatches": 1})
         )
         with patch("openadapt_tray.hosted.httpx.Client", return_value=fake):
             result = poller.poll_once()
 
         assert result is not None
         assert result.count == 4
+        assert result.halts == 3
+        assert result.uncertain_dispatches == 1
         # Verify the exact request contract (endpoint + bearer auth).
         assert fake.last_url == "https://example.test/api/needs-attention/count"
         assert fake.last_headers["Authorization"] == "Bearer oai_ingest_x"
@@ -224,9 +226,7 @@ class TestRouteBreakClick:
         cfg = make_config(deployment_lane="cloud")
         with patch("openadapt_tray.hosted.webbrowser.open") as mock_open:
             route_break_click(cfg, ipc_client=None)
-        mock_open.assert_called_once_with(
-            "https://example.test/dashboard/needs-attention"
-        )
+        mock_open.assert_called_once_with("https://example.test/dashboard")
 
     def test_byoc_lane_routes_to_desktop(self):
         cfg = make_config(deployment_lane="byoc")
