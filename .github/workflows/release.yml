@@ -1,5 +1,8 @@
 name: Release and PyPI Publish
 
+# Semantic release writes a version commit to protected main, so checkout and
+# publication use the same organization release credential as openadapt-flow.
+
 on:
   push:
     branches:
@@ -18,6 +21,7 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
+          token: ${{ secrets.ADMIN_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
@@ -31,7 +35,7 @@ jobs:
         id: release
         uses: python-semantic-release/python-semantic-release@7b3f71697ccfbaef884e1e754b6364e974b134cf # v9.15.2
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.ADMIN_TOKEN }}
 
       - name: Verify release workspace
         if: steps.release.outputs.released == 'true'
@@ -47,4 +51,4 @@ jobs:
         if: steps.release.outputs.released == 'true'
         uses: python-semantic-release/publish-action@b9c41d4b0754dee5a6c7188d42b33f66e3a8aafd # v9.15.2
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.ADMIN_TOKEN }}
