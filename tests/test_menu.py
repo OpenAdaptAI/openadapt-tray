@@ -49,6 +49,34 @@ class TestMenuBuilder:
         # pystray.Menu is the expected type
         assert menu is not None
 
+    def _menu_labels(self, menu):
+        """Collect the text of every top-level menu item."""
+        labels = []
+        for item in menu.items:
+            try:
+                labels.append(str(item.text))
+            except Exception:
+                labels.append("")
+        return labels
+
+    def test_grounding_settings_item_present(self):
+        """The menu exposes a governed 'Grounding Model...' entry point."""
+        app = self.create_mock_app()
+        builder = MenuBuilder(app)
+
+        menu = builder.build()
+
+        assert any("Grounding Model" in label for label in self._menu_labels(menu))
+
+    def test_grounding_settings_item_routes_to_app(self):
+        """Clicking the grounding item calls app.open_grounding_settings."""
+        app = self.create_mock_app()
+        builder = MenuBuilder(app)
+
+        builder._open_grounding_settings()
+
+        app.open_grounding_settings.assert_called_once()
+
     def test_recording_item_when_idle(self):
         """Test recording item shows 'Start Recording' when idle."""
         app = self.create_mock_app(AppState(state=TrayState.IDLE))

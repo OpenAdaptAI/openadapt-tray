@@ -239,3 +239,27 @@ class TestQuit:
         with patch.object(app, "stop_recording") as mock_stop:
             app.quit()
             mock_stop.assert_called_once()
+
+
+class TestGroundingSettings:
+    """Tests for the governed grounding-model settings entry point."""
+
+    @patch("openadapt_tray.app.pystray")
+    @patch("openadapt_tray.app.get_platform_handler")
+    def test_open_grounding_settings_opens_dashboard(
+        self, mock_platform, mock_pystray
+    ):
+        """open_grounding_settings routes to the cloud dashboard settings page."""
+        from openadapt_tray.app import TrayApplication
+
+        mock_platform.return_value = MagicMock()
+        mock_pystray.Icon.return_value = MagicMock()
+
+        config = TrayConfig(hosted_url="https://app.openadapt.ai")
+        app = TrayApplication(config=config)
+
+        with patch("openadapt_tray.app.webbrowser.open") as mock_open:
+            app.open_grounding_settings()
+            mock_open.assert_called_once_with(
+                "https://app.openadapt.ai/dashboard/settings"
+            )
