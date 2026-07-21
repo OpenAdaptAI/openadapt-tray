@@ -342,6 +342,18 @@ class TrayApplication:
             f"{self.config.hosted_url.rstrip('/')}/dashboard/settings/ingest"
         )
 
+    def open_grounding_settings(self) -> None:
+        """Open the governed Grounding-model settings in the browser.
+
+        The grounding model is an admin-scoped, off-by-default egress capability
+        governed by the cloud control plane (Tier-3 policy). The tray does not
+        edit governed config locally; it opens the canonical dashboard editor,
+        where an org admin can view or change it (members see it read-only).
+        """
+        webbrowser.open(
+            f"{self.config.hosted_url.rstrip('/')}/dashboard/settings"
+        )
+
     def pause_sync(self) -> None:
         """Ask the desktop to pause the upload/sync queue."""
         if self.ipc.is_connected():

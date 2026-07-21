@@ -61,6 +61,7 @@ class MenuBuilder:
             self._build_sync_item(state),
             Item("Login...", self._login),
             Item("Settings...", self._open_settings),
+            Item("Grounding Model...", self._open_grounding_settings),
             Menu.SEPARATOR,
             Item("Quit", self._quit),
         ]
@@ -205,6 +206,14 @@ class MenuBuilder:
     def _open_settings(self) -> None:
         """Open settings dialog."""
         self.app.platform.open_settings_dialog(self.app.config)
+
+    def _open_grounding_settings(self) -> None:
+        """Open the governed Grounding-model settings (cloud dashboard).
+
+        Admin-scoped, off-by-default egress capability; the canonical editor is
+        the cloud control plane. The tray never edits governed config locally.
+        """
+        self.app.open_grounding_settings()
 
     def _quit(self) -> None:
         """Quit the application."""
