@@ -409,8 +409,11 @@ class TrayApplication:
 
     def _open_browser(self, url: str, failure_title: str) -> bool:
         """Open a URL and keep a missing browser distinct from a successful open."""
-        if webbrowser.open(url):
-            return True
+        try:
+            if webbrowser.open(url):
+                return True
+        except Exception as e:
+            print(f"Failed to open {url}: {e}")
         self.notifications.show(
             failure_title,
             f"No usable browser opened. Open {url} manually.",

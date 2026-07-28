@@ -425,6 +425,17 @@ class TestOpenActionsReportDeadEnds:
 
         app.notifications.show.assert_called_once()
 
+    def test_browser_exception_is_reported(self):
+        app = _make_test_app()
+        app.notifications = MagicMock()
+
+        with patch(
+            "openadapt_tray.app.webbrowser.open", side_effect=OSError("no browser")
+        ):
+            assert app.open_cloud_dashboard() is False
+
+        app.notifications.show.assert_called_once()
+
 
 class TestFailedIPCResultsStayFailed:
     """A False command result means that the tray sent no command."""

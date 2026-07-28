@@ -256,6 +256,14 @@ class TestRouteBreakClick:
             route_break_click(cfg, ipc_client=None)
         mock_open.assert_called_once()
 
+    def test_browser_exception_reports_no_route(self):
+        cfg = make_config(deployment_lane="cloud")
+        with patch(
+            "openadapt_tray.hosted.webbrowser.open",
+            side_effect=OSError("no browser"),
+        ):
+            assert route_break_click(cfg, ipc_client=None) is False
+
 
 class TestUnreadableCountPayload:
     """A body we cannot read is NOT a count of zero.
@@ -278,6 +286,11 @@ class TestUnreadableCountPayload:
     def test_non_numeric_count_raises(self):
         with pytest.raises(InvalidCountPayload):
             CountResult.from_payload({"count": "lots"})
+
+    @pytest.mark.parametrize("value", [False, True, 0.0, 1.9, "2"])
+    def test_non_json_integer_count_raises(self, value):
+        with pytest.raises(InvalidCountPayload):
+            CountResult.from_payload({"count": value})
 
     def test_negative_count_raises(self):
         with pytest.raises(InvalidCountPayload):
