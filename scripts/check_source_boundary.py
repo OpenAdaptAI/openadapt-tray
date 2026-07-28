@@ -16,9 +16,10 @@ import subprocess
 import sys
 import tarfile
 import zipfile
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
-from typing import BinaryIO, Iterator
+from typing import BinaryIO
 
 ROOT = Path(__file__).resolve().parents[1]
 POLICY_PATH = ROOT / "source-policy.public.json"
