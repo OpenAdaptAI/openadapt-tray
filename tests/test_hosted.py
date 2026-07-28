@@ -233,10 +233,22 @@ class TestRouteBreakClick:
     def test_byoc_lane_routes_to_desktop(self):
         cfg = make_config(deployment_lane="byoc")
         ipc = MagicMock()
+        ipc.send_open_teach.return_value = True
         with patch("openadapt_tray.hosted.webbrowser.open") as mock_open:
-            route_break_click(cfg, ipc_client=ipc)
+            assert route_break_click(cfg, ipc_client=ipc) is True
         ipc.send_open_teach.assert_called_once()
         mock_open.assert_not_called()
+
+    def test_byoc_command_failure_falls_back_to_dashboard(self):
+        """A False IPC result means the local teach view did not open."""
+        cfg = make_config(deployment_lane="byoc")
+        ipc = MagicMock()
+        ipc.send_open_teach.return_value = False
+        with patch(
+            "openadapt_tray.hosted.webbrowser.open", return_value=True
+        ) as mock_open:
+            assert route_break_click(cfg, ipc_client=ipc) is True
+        mock_open.assert_called_once_with("https://example.test/dashboard")
 
     def test_byoc_falls_back_to_dashboard_when_no_desktop(self):
         cfg = make_config(deployment_lane="byoc")

@@ -314,8 +314,9 @@ def route_break_click(
     # unreachable (or there is no IPC client to reach it with).
     if config.deployment_lane == "byoc" and ipc_client is not None:
         try:
-            ipc_client.send_open_teach()
-            return True
+            if ipc_client.send_open_teach():
+                return True
+            print("Desktop refused the open-teach command; trying the dashboard")
         except Exception as e:
             print(f"Failed to route byoc break click to desktop: {e}")
     # webbrowser.open returns False when it could not find or start a browser.
