@@ -16,6 +16,7 @@ Click routing is lane-aware:
 """
 
 import hashlib
+import hmac
 import json
 import os
 import re
@@ -48,6 +49,7 @@ CREDENTIAL_CONTRACT_KEYS = {
 CREDENTIAL_WARNING_STATE_VERSION = 1
 MAX_DELIVERED_CREDENTIAL_WARNINGS = 32
 INGEST_TOKEN_PATTERN = re.compile(r"^oai_ingest_[A-Za-z0-9_-]{43}$")
+CREDENTIAL_IDENTITY_DOMAIN = b"openadapt-tray/credential-identity/v1"
 
 
 class InvalidCountPayload(ValueError):
@@ -166,8 +168,12 @@ def parse_credential_status(
 
 def credential_identity(hosted_url: str, token: str) -> str:
     """Return a non-secret identity digest without storing or logging a token."""
-    material = f"{hosted_url.rstrip('/')}\0{token}".encode()
-    return hashlib.sha256(material).hexdigest()
+    message = CREDENTIAL_IDENTITY_DOMAIN + b"\0" + hosted_url.rstrip("/").encode()
+    return hmac.new(
+        token.encode(),
+        message,
+        hashlib.sha256,
+    ).hexdigest()
 
 
 def credential_warning_key(identity: str, credential: CredentialStatus) -> str:

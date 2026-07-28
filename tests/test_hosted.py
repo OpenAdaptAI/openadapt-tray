@@ -84,6 +84,16 @@ class TestCountUrl:
             == "https://example.test/api/needs-attention/count"
         )
 
+    def test_credential_identity_is_stable_and_host_bound(self):
+        first = credential_identity("https://example.test", VALID_INGEST_TOKEN)
+
+        assert first == credential_identity(
+            "https://example.test/", VALID_INGEST_TOKEN
+        )
+        assert first != credential_identity(
+            "https://other.test", VALID_INGEST_TOKEN
+        )
+
 
 class TestPollOnce:
     """Tests for the single authenticated request."""
