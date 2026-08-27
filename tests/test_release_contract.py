@@ -173,20 +173,30 @@ def test_locked_wrapper_preserves_psr_github_outputs(tmp_path: Path) -> None:
     python = bin_dir / "python"
     python.symlink_to(real_python)
     cli = bin_dir / "semantic-release"
-    cli.write_text(
-        "#!/bin/sh\n"
-        "printf '%s\\n' 'released=true' 'version=0.3.3' 'tag=v0.3.3' "
-        ">> \"$GITHUB_OUTPUT\"\n",
-        encoding="utf-8",
-    )
+    cli.touch()
     cli.chmod(cli.stat().st_mode | stat.S_IXUSR)
     output = tmp_path / "github-output"
     environment = {"GH_TOKEN": "test-token", "GITHUB_OUTPUT": str(output)}
+
+    def fake_runner(
+        command: list[str],
+        *,
+        env: dict[str, str],
+        check: bool,
+    ) -> subprocess.CompletedProcess[object]:
+        assert command == [str(cli), "-v", "version"]
+        assert check is False
+        Path(env["GITHUB_OUTPUT"]).write_text(
+            "released=true\nversion=0.3.3\ntag=v0.3.3\n",
+            encoding="utf-8",
+        )
+        return subprocess.CompletedProcess(command, 0)
 
     result = run_release(
         environment=environment,
         version_reader=lambda name: REQUIRED_RUNTIME[name],
         python_executable=str(python),
+        runner=fake_runner,
     )
 
     assert result == 0
