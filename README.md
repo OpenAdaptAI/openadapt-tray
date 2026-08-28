@@ -9,8 +9,8 @@ button for it. It records nothing, compiles nothing, and replays nothing. It
 mirrors state from the desktop app over an authenticated loopback socket and
 reads one number from the hosted control plane.
 
-Which means the honest description is: this is a status surface. The workflow
-logic all lives in
+Which means the honest description is: this is a status surface, not an
+integrated desktop product. The workflow logic all lives in
 [`openadapt-flow`](https://github.com/OpenAdaptAI/openadapt-flow).
 
 [Documentation](https://docs.openadapt.ai) ·
@@ -116,8 +116,8 @@ proves a working installer, a live hosted service, or an authoring loop that
 runs end to end.
 
 - `openadapt-desktop`'s `main` serves the exact discovery-socket and command
-  contract this tray expects, but the two have never been validated together,
-  and no signed generally-available desktop build ships that server.
+  contract this tray expects, but the two have not been validated together end
+  to end, and no signed generally-available desktop build ships that server.
 - No packaged installer proves tray startup, permissions, or auto-start on
   macOS, Windows, and Linux.
 - Hosted polling is tested against mocks. Nothing here validates a live service
