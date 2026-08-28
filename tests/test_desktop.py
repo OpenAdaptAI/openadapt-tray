@@ -8,6 +8,7 @@ import pytest
 
 from openadapt_tray.desktop import (
     DESKTOP_BUNDLE_IDENTIFIER,
+    LINUX_NATIVE_EXECUTABLE,
     DesktopLaunchError,
     launch_native_desktop,
 )
@@ -75,8 +76,22 @@ def test_linux_launches_by_registered_desktop_identity() -> None:
 
     assert runner.call_args.args[0] == [
         "/usr/bin/gtk-launch",
-        DESKTOP_BUNDLE_IDENTIFIER,
+        "OpenAdapt Desktop",
     ]
+
+
+def test_linux_can_launch_the_exact_deb_executable() -> None:
+    spawner = MagicMock()
+
+    launch_native_desktop(
+        platform="linux",
+        environment={},
+        spawner=spawner,
+        finder=lambda _name: None,
+        is_file=lambda path: path == LINUX_NATIVE_EXECUTABLE,
+    )
+
+    assert spawner.call_args.args[0] == [str(LINUX_NATIVE_EXECUTABLE)]
 
 
 def test_linux_can_launch_an_explicit_native_appimage() -> None:

@@ -11,10 +11,8 @@ from pathlib import Path
 
 DESKTOP_APP_NAME = "OpenAdapt Desktop"
 DESKTOP_BUNDLE_IDENTIFIER = "ai.openadapt.desktop"
-LINUX_DESKTOP_IDENTITIES = (
-    DESKTOP_BUNDLE_IDENTIFIER,
-    "openadapt-desktop",
-)
+LINUX_DESKTOP_IDENTITY = DESKTOP_APP_NAME
+LINUX_NATIVE_EXECUTABLE = Path("/usr/bin/openadapt-desktop")
 
 
 class DesktopLaunchError(RuntimeError):
@@ -109,10 +107,17 @@ def launch_native_desktop(
 
     if platform.startswith("linux"):
         gtk_launch = finder("gtk-launch")
-        if gtk_launch:
-            for identity in LINUX_DESKTOP_IDENTITIES:
-                if _run_launcher([gtk_launch, identity], runner=runner):
-                    return
+        if gtk_launch and _run_launcher(
+            [gtk_launch, LINUX_DESKTOP_IDENTITY],
+            runner=runner,
+        ):
+            return
+
+        if is_file(LINUX_NATIVE_EXECUTABLE) and _spawn_executable(
+            LINUX_NATIVE_EXECUTABLE,
+            spawner=spawner,
+        ):
+            return
 
         appimage = environment.get("OPENADAPT_DESKTOP_APPIMAGE")
         if appimage:
