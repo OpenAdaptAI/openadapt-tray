@@ -21,7 +21,9 @@ logic all lives in
 
 ```bash
 pip install openadapt-tray
-openadapt-tray            # or openadapt-tray-gui, the windowless variant
+openadapt-tray            # openadapt-tray-gui is the same entry point,
+                          # registered under gui_scripts so Windows
+                          # launches it without a console window
 ```
 
 Needs a graphical session. With no desktop IPC server and no hosted token it
@@ -149,8 +151,9 @@ on macOS, `%APPDATA%/openadapt/tray.json` on Windows, and
 }
 ```
 
-`deployment_lane` takes `cloud` or `byoc`, and `stop_on_triple_ctrl` (on by
-default) is what makes that triple-ctrl stop hotkey live. The ingest token does
+`deployment_lane` takes `cloud` or `byoc`. The triple-ctrl stop hotkey is real,
+not a typo: the `stop_on_triple_ctrl` setting defaults to true and is what
+enables it. The ingest token does
 not belong in this file.
 
 ## Development
