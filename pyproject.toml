@@ -51,7 +51,7 @@ dev = [
     "ruff>=0.16,<0.17",
 ]
 release = [
-    "uv==0.12.5",
+    "uv==0.12.7",
     # Build inside this reviewed environment. An isolated `uv build` would
     # resolve the backend again and bypass uv.lock.
     "hatchling==1.31.0",
