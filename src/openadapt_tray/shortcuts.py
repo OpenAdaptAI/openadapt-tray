@@ -52,10 +52,14 @@ def _split_hotkey(spec: str) -> list[str] | None:
     return parts
 
 
-def _display_key(key: str, platform: str) -> str:
-    """Return the display name of one key from a pynput hotkey string."""
+def _display_key(key: str, platform: str) -> str | None:
+    """Return the display name of one key from a pynput hotkey string.
+
+    Returns None for a key pynput would reject: more than one character
+    without angle brackets ("ctrl"), or empty brackets ("<>").
+    """
     if not (key.startswith("<") and key.endswith(">") and len(key) > 2):
-        return key.upper()
+        return key.upper() if len(key) == 1 else None
     name = key[1:-1].lower()
     if name.isdigit():
         # A virtual key code has no display name; show it as configured.
@@ -80,18 +84,24 @@ def format_hotkey(spec: str, platform: str | None = None) -> str:
     """Format a pynput hotkey string the way the platform shows shortcuts.
 
     "<ctrl>+<shift>+r" becomes "⌃⇧R" on macOS and "Ctrl+Shift+R" on Windows
-    and Linux. A string pynput would reject is returned unchanged, so a bad
-    setting still shows up in the menu instead of breaking it.
+    and Linux. A string that is not in pynput's form ("ctrl+shift+r", "<ctrl>+")
+    is returned unchanged, and a value that is not a string (null in tray.json)
+    is shown as ``str()`` gives it, so a bad setting still shows up in the menu
+    instead of breaking it. Key names are not checked against pynput's list.
 
     Args:
         spec: The hotkey as configured, in pynput GlobalHotKeys syntax.
         platform: A ``sys.platform`` value. Defaults to the running platform.
     """
+    if not isinstance(spec, str):
+        return str(spec)
     platform = sys.platform if platform is None else platform
     keys = _split_hotkey(spec)
     if keys is None:
         return spec
     shown = [_display_key(key, platform) for key in keys]
+    if None in shown:
+        return spec
     return "".join(shown) if platform == "darwin" else "+".join(shown)
 
 

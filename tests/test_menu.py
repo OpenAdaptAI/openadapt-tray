@@ -88,6 +88,17 @@ class TestMenuBuilder:
         assert ">" not in text
         assert text == label
 
+    def test_recording_item_with_null_hotkey_still_builds(self):
+        """A null toggle_recording in tray.json must not break the menu."""
+        app = self.create_mock_app(AppState(state=TrayState.IDLE))
+        app.config.hotkeys.toggle_recording = None
+        builder = MenuBuilder(app)
+
+        item = builder._build_recording_item(app.state.current)
+
+        assert str(item.text) == "Start Recording (None)"
+        assert builder.build() is not None
+
     def test_recording_item_when_recording(self):
         """Test recording item shows 'Stop Recording' when recording."""
         app = self.create_mock_app(

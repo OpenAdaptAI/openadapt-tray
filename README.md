@@ -48,9 +48,9 @@ Quit
 The hotkey in the recording item is your `toggle_recording` setting, shown the
 way your platform writes shortcuts. During a local operation the recording item
 becomes Starting, Stop Recording, Stopping, or Compiling. The account row turns
-into a sign-in action, an expiry
-warning, or an unavailable status, and clicking it opens the credential
-settings page. These labels follow events; the tray isn't doing the work.
+into a sign-in action, an expiry warning, or an unavailable status, and
+clicking it opens the credential settings page. These labels follow events; the
+tray isn't doing the work.
 
 The icon is always the OpenAdapt mark, tinted by state so you can read it at a
 glance: brand blue idle, amber starting or stopping, red while recording,

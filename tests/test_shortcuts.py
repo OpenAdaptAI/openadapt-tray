@@ -38,10 +38,19 @@ class TestFormatHotkey:
         with patch("sys.platform", "win32"):
             assert format_hotkey("<ctrl>+<shift>+r") == "Ctrl+Shift+R"
 
-    @pytest.mark.parametrize("spec", ["", "<ctrl>+", "+"])
-    def test_malformed_spec_is_shown_unchanged(self, spec):
-        # A bad hotkey in tray.json must not stop the menu from rendering.
-        assert format_hotkey(spec, "darwin") == spec
+    @pytest.mark.parametrize(
+        "spec", ["", "<ctrl>+", "+", "ctrl+shift+r", "<>+r", "<ctrl>+rr"]
+    )
+    @pytest.mark.parametrize("platform", ["darwin", "win32", "linux"])
+    def test_malformed_spec_is_shown_unchanged(self, spec, platform):
+        # A bad hotkey in tray.json must not stop the menu from rendering, and
+        # must not be dressed up as a shortcut pynput would never register.
+        assert format_hotkey(spec, platform) == spec
+
+    @pytest.mark.parametrize(("value", "shown"), [(None, "None"), (5, "5")])
+    def test_non_string_setting_is_shown_as_text(self, value, shown):
+        # tray.json can hold null or a number here; the menu must still build.
+        assert format_hotkey(value, "darwin") == shown
 
     def test_virtual_key_code_is_left_as_written(self):
         # pynput accepts "<65>" as a virtual key code; there is no honest
