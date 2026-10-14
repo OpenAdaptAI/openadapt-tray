@@ -81,7 +81,7 @@ Authorization: Bearer <ingest token>
   seconds, and every 5 minutes while offline.
 - A response without a readable integer `count` is treated as a failed poll.
   The badge keeps its last value instead of dropping to zero.
-- The control plane decides when a credential is expiring soon. The tray shows
+- OpenAdapt Cloud decides when a credential is expiring soon. The tray shows
   one notification per credential and expiry date, and remembers which ones it
   showed in `credential-warning-state.json` next to `tray.json`. That file holds
   only hashes, never the token.

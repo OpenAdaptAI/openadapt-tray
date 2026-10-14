@@ -6,8 +6,9 @@
 
 openadapt-tray puts OpenAdapt in the macOS menu bar or the Windows and Linux
 system tray. You can start and stop recordings from its menu or with a hotkey,
-see whether OpenAdapt Desktop is recording or compiling, and see how many of
-your automations in OpenAdapt Cloud stopped and need a person.
+see whether OpenAdapt Desktop is recording or compiling a recording into a
+workflow, and see how many of your automations in OpenAdapt Cloud stopped and
+need a person.
 
 It's for people who use
 [OpenAdapt Desktop](https://github.com/OpenAdaptAI/openadapt-desktop) and want
@@ -24,15 +25,19 @@ openadapt-tray
 ```
 
 The OpenAdapt icon appears in the menu bar or system tray. When you select
-**Start Recording**, the tray asks for a capture name, starts OpenAdapt Desktop
-if it isn't running, and asks it to record. Without OpenAdapt Desktop, the tray
-runs, but recording can't start. The
-[OpenAdapt Desktop README](https://github.com/OpenAdaptAI/openadapt-desktop#try-it)
-says which desktop build to use.
+**Start Recording**, the tray asks for a capture name, starts the installed
+OpenAdapt Desktop app if it isn't running, and asks it to record.
 
-On macOS, the global hotkeys need Accessibility permission for the app that
-starts the tray, such as Terminal. Turn it on in **System Settings** >
-**Privacy & Security** > **Accessibility**. The menu works without it.
+Without the desktop app, the tray runs, but recording can't start. OpenAdapt
+Desktop has no trusted signed build to download yet
+([its README](https://github.com/OpenAdaptAI/openadapt-desktop#try-it) explains),
+and the `openadapt-desktop` command that pip installs doesn't open the socket
+the tray connects to.
+
+On macOS, the global hotkeys need permission to read the keyboard. Allow the
+app that starts the tray, such as Terminal, in **System Settings** >
+**Privacy & Security** under **Accessibility** and **Input Monitoring**. The
+menu works without them.
 
 Once OpenAdapt Desktop is signed in to OpenAdapt Cloud, the tray checks for
 automations that need attention. It reads the same token from the OS keychain,
@@ -47,7 +52,8 @@ Recent Captures                    View opens a capture's folder
 Open Desktop App
 Open Cloud Dashboard
 Account: connected · 30 days left  or "Account: sign in" when signed out
-Pause Sync                         "Resume Sync" while paused
+Pause Sync                         "Resume Sync" while paused,
+                                   "Sync (offline)" when signed out or offline
 Settings...                        opens tray.json
 Quit
 ```
@@ -61,9 +67,10 @@ color:
 | <img src="https://raw.githubusercontent.com/OpenAdaptAI/openadapt-tray/main/assets/icons/idle@2x.png" width="32" alt="Blue OpenAdapt icon"> | <img src="https://raw.githubusercontent.com/OpenAdaptAI/openadapt-tray/main/assets/icons/recording_starting@2x.png" width="32" alt="Amber OpenAdapt icon"> | <img src="https://raw.githubusercontent.com/OpenAdaptAI/openadapt-tray/main/assets/icons/recording@2x.png" width="32" alt="Red OpenAdapt icon"> | <img src="https://raw.githubusercontent.com/OpenAdaptAI/openadapt-tray/main/assets/icons/compiling@2x.png" width="32" alt="Purple OpenAdapt icon"> |
 
 A red dot on the icon means automations need attention. Selecting the
-needs-attention item or its notification opens the cloud dashboard. If this
-machine is set up for your own environment (the `byoc` lane), it opens Teach in
-OpenAdapt Desktop instead, and never the cloud dashboard.
+needs-attention item opens the cloud dashboard. If `deployment_lane` is `byoc`,
+the setting for keeping recordings on this machine, the item opens Teach in
+OpenAdapt Desktop instead and never opens the cloud dashboard. Either
+`tray.json` or OpenAdapt Desktop can set it.
 
 [PROTOCOL.md](https://github.com/OpenAdaptAI/openadapt-tray/blob/main/docs/PROTOCOL.md)
 describes the local socket, the one cloud request, and how the tray handles the
@@ -97,14 +104,18 @@ The settings you're most likely to change:
 
 - Hotkeys use [pynput](https://pynput.readthedocs.io/) syntax.
   `open_dashboard` opens the workflow library in OpenAdapt Desktop.
-- `stop_on_triple_ctrl` stops a recording when you press Ctrl three times.
+- `stop_on_triple_ctrl` stops a recording when you press Ctrl three times,
+  each within half a second of the last.
 - `deployment_lane` is `cloud` or `byoc`.
 - `captures_directory` is the folder that **Recent Captures** lists. It
   defaults to `~/openadapt/captures`.
 - `poll_interval_s` sets how often, in seconds, the tray checks OpenAdapt
   Cloud. The minimum is 30.
 
-The token never goes in this file.
+The token never goes in this file. The file that **Settings...** creates also
+has keys the tray doesn't use: `dashboard_port`, `auto_launch_dashboard`,
+`auto_start_on_login`, `minimize_to_tray`, `default_record_audio`,
+`default_transcribe`, and `hotkeys.stop_recording`.
 
 ## Development
 
@@ -128,6 +139,9 @@ src/openadapt_tray/
   shortcuts.py      global hotkeys
   keychain.py       ingest-token lookup
   config.py         tray.json
+  desktop.py        finds and starts the installed OpenAdapt Desktop app
+  notifications.py  desktop notifications
+  platform/         per-OS dialogs and opening tray.json
 ```
 
 To try OpenAdapt itself from the command line, start with the
@@ -139,9 +153,13 @@ To try OpenAdapt itself from the command line, start with the
   shows what OpenAdapt Desktop and OpenAdapt Cloud report.
 - OpenAdapt Desktop's CI tests this tray's socket client against the desktop's
   server. The two apps haven't been run together end to end from packaged
-  installs, and OpenAdapt Desktop has no trusted signed installer yet.
-- The quick start was checked by hand on macOS 15. On Windows and Linux, only
-  the unit tests run in CI.
+  installs.
+- The quick start was checked by hand on macOS 15: the tray starts and shows
+  this menu. Recording through OpenAdapt Desktop and the global hotkeys weren't
+  tried. On Windows and Linux, only the unit tests run in CI.
+- On macOS, a tray installed with pip sends notifications through AppleScript,
+  so clicking a needs-attention notification doesn't open the dashboard.
+  Notification clicks haven't been tried on Windows or Linux.
 - The cloud poller is tested against mocked responses, not a live account.
 - There's no installer, and the tray doesn't start at login.
 - OpenAdapt Desktop saves its captures in `~/.openadapt/captures` and manages
