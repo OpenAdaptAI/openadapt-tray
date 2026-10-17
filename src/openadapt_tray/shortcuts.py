@@ -1,9 +1,146 @@
 """Global hotkey handling for OpenAdapt Tray."""
 
 import contextlib
+import importlib
+import sys
 import threading
 from collections.abc import Callable
 from dataclasses import dataclass
+
+# Display names for pynput key names. macOS menus use symbols and no
+# separator; Windows and Linux spell the keys out and join them with "+".
+# Keys not listed here are title-cased ("page_up" shows as "Page Up").
+_MAC_KEYS = {
+    "ctrl": "⌃",
+    "shift": "⇧",
+    "alt": "⌥",
+    "cmd": "⌘",
+    "enter": "↩",
+    "esc": "⎋",
+    "tab": "⇥",
+    "backspace": "⌫",
+    "delete": "⌦",
+    "up": "↑",
+    "down": "↓",
+    "left": "←",
+    "right": "→",
+}
+_PC_KEYS = {
+    "ctrl": "Ctrl",
+    "shift": "Shift",
+    "alt": "Alt",
+    "alt_gr": "AltGr",
+    "esc": "Esc",
+}
+_SIDE_SUFFIXES = ("_l", "_r", "_gr")
+
+
+def _split_hotkey(spec: str) -> list[str] | None:
+    """Split a pynput hotkey string into keys, as pynput's parser does.
+
+    A "+" right after a separator is the plus key itself, so "<ctrl>++" is
+    Ctrl and "+". Returns None for a string pynput would reject.
+    """
+    parts = []
+    start = 0
+    for i, c in enumerate(spec):
+        if c == "+" and i != start:
+            parts.append(spec[start:i])
+            start = i + 1
+    if start == len(spec):
+        return None
+    parts.append(spec[start:])
+    return parts
+
+
+def _display_key(key: str, platform: str) -> str | None:
+    """Return the display name of one key from a pynput hotkey string.
+
+    Returns None for a key pynput would reject: more than one character
+    without angle brackets ("ctrl"), or empty brackets ("<>").
+    """
+    if not (key.startswith("<") and key.endswith(">") and len(key) > 2):
+        return key.upper() if len(key) == 1 else None
+    name = key[1:-1].lower()
+    if name.isdigit():
+        # A virtual key code has no display name; show it as configured.
+        return key
+    if platform == "darwin":
+        names = _MAC_KEYS
+    else:
+        names = {**_PC_KEYS, "cmd": "Win" if platform == "win32" else "Super"}
+    if name not in names:
+        # Left and right modifiers (ctrl_l, shift_r, ...) show as the modifier.
+        base, sep, side = name.rpartition("_")
+        if sep and f"_{side}" in _SIDE_SUFFIXES and base in names:
+            name = base
+    if name in names:
+        return names[name]
+    if name[0] == "f" and name[1:].isdigit():
+        return name.upper()
+    return name.replace("_", " ").title()
+
+
+def format_hotkey(spec: str, platform: str | None = None) -> str:
+    """Format a pynput hotkey string the way the platform shows shortcuts.
+
+    "<ctrl>+<shift>+r" becomes "⌃⇧R" on macOS and "Ctrl+Shift+R" on Windows
+    and Linux. A string that is not in pynput's form ("ctrl+shift+r", "<ctrl>+")
+    is returned unchanged, and a value that is not a string (null in tray.json)
+    is shown as ``str()`` gives it, so a bad setting still shows up in the menu
+    instead of breaking it. Key names are not checked against pynput's list.
+
+    Args:
+        spec: The hotkey as configured, in pynput GlobalHotKeys syntax.
+        platform: A ``sys.platform`` value. Defaults to the running platform.
+    """
+    if not isinstance(spec, str):
+        return str(spec)
+    platform = sys.platform if platform is None else platform
+    keys = _split_hotkey(spec)
+    if keys is None:
+        return spec
+    shown = [_display_key(key, platform) for key in keys]
+    if None in shown:
+        return spec
+    return "".join(shown) if platform == "darwin" else "+".join(shown)
+
+
+def _pin_macos_keyboard_layout() -> bool:
+    """Read the keyboard layout on the main thread and give pynput that copy.
+
+    pynput's macOS listeners read the current keyboard layout with the Text
+    Input Sources API from their own background threads. Once the process has
+    an NSApplication, which pystray creates, macOS 15 aborts the process when
+    that API runs off the main thread, so ``openadapt-tray`` died with SIGABRT
+    about a second after it started. Reading the layout here and handing every
+    listener the same value keeps the call on the main thread. pynput reads the
+    layout once per listener anyway, so the listeners behave as before.
+
+    Returns:
+        True when the listeners can start. False means no listener may start,
+        because starting one would call the API off the main thread.
+    """
+    if threading.current_thread() is not threading.main_thread():
+        print("Warning: hotkeys must be started on the main thread on macOS")
+        return False
+    try:
+        darwin_util = importlib.import_module("pynput._util.darwin")
+        darwin_keyboard = importlib.import_module("pynput.keyboard._darwin")
+        if not hasattr(darwin_keyboard, "keycode_context"):
+            raise AttributeError("pynput.keyboard._darwin has no keycode_context")
+        with darwin_util.keycode_context() as layout:
+            pinned = layout
+    except Exception as e:
+        print(f"Warning: could not read the keyboard layout: {e}")
+        return False
+
+    @contextlib.contextmanager
+    def pinned_keycode_context():
+        yield pinned
+
+    darwin_keyboard.keycode_context = pinned_keycode_context
+    return True
 
 
 @dataclass
@@ -54,6 +191,10 @@ class HotkeyManager:
 
         try:
             from pynput import keyboard
+
+            if sys.platform == "darwin" and not _pin_macos_keyboard_layout():
+                print("Warning: hotkeys disabled; use the tray menu instead")
+                return
 
             # Build hotkey dict for pynput
             hotkeys = {}
