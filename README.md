@@ -4,6 +4,11 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/OpenAdaptAI/openadapt-tray/blob/main/LICENSE)
 
+> **openadapt-tray has moved into the [OpenAdapt monorepo](https://github.com/OpenAdaptAI/OpenAdapt)**,
+> in [`packages/tray`](https://github.com/OpenAdaptAI/OpenAdapt/tree/main/packages/tray).
+> Open new issues and pull requests there. The PyPI name stays `openadapt-tray`; the next
+> release publishes from the monorepo. This repository keeps its history and isn't archived yet.
+
 openadapt-tray puts OpenAdapt in the macOS menu bar or the Windows and Linux
 system tray. You can start and stop recordings from its menu or with a hotkey,
 see whether OpenAdapt Desktop is recording or compiling a recording into a
